@@ -1,23 +1,8 @@
-// ===================================================
-// machines.js — Turing Machine Definitions
-// Each machine is a formal 7-tuple:
-// (Q, Σ, Γ, δ, q0, q_accept, q_reject)
-// Q        = set of states
-// Σ        = input alphabet
-// Γ        = tape alphabet (includes blank B)
-// δ        = transition function
-// q0       = start state
-// q_accept = accept state
-// q_reject = reject state
-// ===================================================
+
 
 const MACHINES = {
 
-  // --------------------------------------------------
-  // MACHINE 1: Equal number of 0s and 1s
-  // Language: { w | #0(w) == #1(w) }
-  // Strategy: cross off one 0 and one 1 at a time
-  // --------------------------------------------------
+  
   equal01: {
     name: "Equal 0s and 1s",
     states: ["q0", "q1", "q2", "q3", "q4", "accept", "reject"],
@@ -58,11 +43,7 @@ const MACHINES = {
     ]
   },
 
-  // --------------------------------------------------
-  // MACHINE 2: Binary Palindrome
-  // Language: { w | w is a palindrome over {0,1} }
-  // Strategy: match first and last symbol repeatedly
-  // --------------------------------------------------
+ 
   palindrome: {
     name: "Binary Palindrome",
     states: ["q0", "q1", "q2", "q3", "q4", "q5", "accept", "reject"],
@@ -107,11 +88,7 @@ const MACHINES = {
     ]
   },
 
-  // --------------------------------------------------
-  // MACHINE 3: Unary Addition
-  // Input format: 1...+1... (e.g. "111+11" = 3+2)
-  // Strategy: replace + with 1, remove last 1
-  // --------------------------------------------------
+
   unary: {
     name: "Unary Addition",
     states: ["q0", "q1", "accept"],
@@ -128,7 +105,7 @@ const MACHINES = {
     ]
   },
 
-  // Custom machine placeholder — filled by the builder
+ 
   custom: {
     name: "My Custom TM",
     states: [],
