@@ -1,8 +1,4 @@
-// =====================================================
-// script.js — Turing Machine Simulator Logic
-// =====================================================
 
-// ===== GLOBAL STATE =====
 let tape = [];
 let head = 0;
 let curState = "";
@@ -18,7 +14,7 @@ let runHistory = [];
 let tapeHistory = [];
 let customMachine = null;
 
-// ===== DOM REFS =====
+
 const machineSelect = document.getElementById("machineSelect");
 const inputStr      = document.getElementById("inputStr");
 const loadBtn       = document.getElementById("loadBtn");
@@ -40,9 +36,7 @@ const canvas        = document.getElementById("stateDiagram");
 const ctx           = canvas.getContext("2d");
 
 
-// =====================================================
-// TAB SWITCHING — fixed: pass button element directly
-// =====================================================
+
 function switchTab(name, btn) {
   document.querySelectorAll(".tab-content").forEach(el => el.classList.remove("active"));
   document.querySelectorAll(".tab").forEach(el => el.classList.remove("active"));
@@ -53,13 +47,7 @@ function switchTab(name, btn) {
 }
 
 
-// =====================================================
-// LOAD MACHINE
-// KEY FIX: loadMachine() only loads the machine definition
-// and updates the transition table.
-// It does NOT reset the tape or overwrite the input field.
-// That is only done by initMachine().
-// =====================================================
+
 function loadMachine() {
   const key = machineSelect.value;
 
@@ -84,15 +72,11 @@ function loadMachine() {
 }
 
 
-// =====================================================
-// INIT / RESET MACHINE
-// This reads whatever is currently in the input box
-// and loads it onto the tape.
-// =====================================================
+
 function initMachine() {
   if (autoTimer) { clearInterval(autoTimer); autoTimer = null; }
 
-  // Use user's typed input — fallback to machine default
+ 
   const input = inputStr.value.trim() !== ""
     ? inputStr.value.trim()
     : (machine.defaultInput || "");
@@ -103,14 +87,14 @@ function initMachine() {
   halted    = false;
   lastTransRowIndex = -1;
 
-  // Reset tracking
+
   stepCount      = 0;
   cellsTouched   = new Set();
   stateStepCount = {};
   machine.states.forEach(s => { stateStepCount[s] = 0; });
   tapeHistory    = [];
 
-  // Reset UI
+
   resultBanner.className = "result-banner hidden";
   resultBanner.textContent = "";
   stepBtn.disabled  = false;
@@ -128,9 +112,6 @@ function initMachine() {
 }
 
 
-// =====================================================
-// RENDER TAPE
-// =====================================================
 function renderTape(writtenCells) {
   tapeEl.innerHTML = "";
 
@@ -146,7 +127,7 @@ function renderTape(writtenCells) {
     tapeEl.appendChild(cell);
   });
 
-  // Scroll head into view
+ 
   const cells = tapeEl.querySelectorAll(".cell");
   if (cells[head]) cells[head].scrollIntoView({ block: "nearest", inline: "center" });
 
@@ -156,9 +137,7 @@ function renderTape(writtenCells) {
 }
 
 
-// =====================================================
-// RENDER STATES
-// =====================================================
+
 function renderStates() {
   statesRow.innerHTML = "";
   machine.states.forEach(s => {
@@ -175,9 +154,7 @@ function renderStates() {
 }
 
 
-// =====================================================
-// RENDER TRANSITION TABLE
-// =====================================================
+
 function renderTransTable() {
   transBody.innerHTML = "";
   machine.transitions.forEach((tr, i) => {
@@ -207,9 +184,6 @@ function highlightTransRow(index) {
 }
 
 
-// =====================================================
-// PLAIN ENGLISH
-// =====================================================
 function makePlainEnglish(tr, symbol) {
   const dir   = tr.move === "R" ? "right" : "left";
   const sym   = symbol === "B" ? "blank" : "'" + symbol + "'";
@@ -220,9 +194,7 @@ function makePlainEnglish(tr, symbol) {
 }
 
 
-// =====================================================
-// LOG
-// =====================================================
+
 function addLog(msg, type) {
   const line = document.createElement("p");
   if (type) line.className = "log-" + type;
@@ -232,9 +204,6 @@ function addLog(msg, type) {
 }
 
 
-// =====================================================
-// TAPE SNAPSHOT
-// =====================================================
 function saveTapeSnapshot() {
   tapeHistory.push({
     step:  stepCount,
@@ -245,22 +214,19 @@ function saveTapeSnapshot() {
 }
 
 
-// =====================================================
-// STEP
-// =====================================================
+
 function stepMachine() {
   if (halted) return;
 
-  // Extend tape if head goes out of bounds
+  
   if (head < 0)            { tape.unshift("B"); head = 0; }
   if (head >= tape.length) { tape.push("B"); }
 
   const symbol = tape[head];
 
-  // Count steps per state
+  
   stateStepCount[curState] = (stateStepCount[curState] || 0) + 1;
 
-  // Find matching transition
   const tr = machine.transitions.find(t => t.from === curState && t.read === symbol);
 
   if (!tr) {
@@ -295,7 +261,7 @@ function stepMachine() {
   drawDiagram();
   saveTapeSnapshot();
 
-  // Check halting
+ 
   if (curState === machine.acceptState) {
     halted = true;
     showResult(true);
@@ -310,9 +276,7 @@ function stepMachine() {
 }
 
 
-// =====================================================
-// RUN AUTO
-// =====================================================
+
 function runAuto() {
   if (halted) return;
   pauseBtn.disabled = false;
@@ -339,9 +303,6 @@ function pauseMachine() {
 }
 
 
-// =====================================================
-// SHOW RESULT + update complexity stats
-// =====================================================
 function showResult(accepted) {
   const inputLen  = inputStr.value.trim().length;
   const cellsUsed = cellsTouched.size;
@@ -357,7 +318,7 @@ function showResult(accepted) {
     addLog(`REJECTED in ${stepCount} steps | Tape cells used: ${cellsUsed}`, "err");
   }
 
-  // Save run to history
+ 
   runHistory.unshift({
     machine: machine.name,
     input:   inputStr.value.trim() || machine.defaultInput,
@@ -367,7 +328,7 @@ function showResult(accepted) {
   });
   if (runHistory.length > 5) runHistory.pop();
 
-  // Update stat cards
+  
   document.getElementById("stat-steps").textContent  = stepCount;
   document.getElementById("stat-cells").textContent  = cellsUsed;
   document.getElementById("stat-input").textContent  = inputLen;
@@ -382,9 +343,6 @@ function disableControls() {
 }
 
 
-// =====================================================
-// STATE DIAGRAM (Canvas)
-// =====================================================
 function drawDiagram() {
   if (!machine) return;
 
@@ -401,7 +359,7 @@ function drawDiagram() {
   const radius = Math.min(cx - 70, 160);
   const nodeR  = 26;
 
-  // Compute positions around a circle
+
   const pos = {};
   states.forEach((s, i) => {
     const angle = (2 * Math.PI * i / n) - Math.PI / 2;
@@ -411,7 +369,7 @@ function drawDiagram() {
     };
   });
 
-  // Draw transition arrows
+
   machine.transitions.forEach(tr => {
     if (!pos[tr.from] || !pos[tr.to]) return;
     const label = `${tr.read}/${tr.write},${tr.move}`;
@@ -426,14 +384,14 @@ function drawDiagram() {
     }
   });
 
-  // Draw state circles
+  
   states.forEach(s => {
     const p         = pos[s];
     const isAccept  = (s === machine.acceptState);
     const isReject  = (s === machine.rejectState);
     const isCurrent = (s === curState);
 
-    // Double ring for accept state
+   
     if (isAccept) {
       ctx.beginPath();
       ctx.arc(p.x, p.y, nodeR + 5, 0, 2 * Math.PI);
@@ -442,7 +400,7 @@ function drawDiagram() {
       ctx.stroke();
     }
 
-    // Fill circle
+   
     ctx.beginPath();
     ctx.arc(p.x, p.y, nodeR, 0, 2 * Math.PI);
     if      (isCurrent && isAccept)  ctx.fillStyle = "#dcfce7";
@@ -453,12 +411,12 @@ function drawDiagram() {
     else                             ctx.fillStyle = "#f8fafc";
     ctx.fill();
 
-    // Border
+    
     ctx.strokeStyle = isCurrent ? "#2563eb" : isAccept ? "#16a34a" : isReject ? "#ef4444" : "#90a4ae";
     ctx.lineWidth   = isCurrent ? 2.5 : 1.5;
     ctx.stroke();
 
-    // Label
+  
     ctx.fillStyle     = isCurrent ? "#1e40af" : isAccept ? "#14532d" : isReject ? "#7f1d1d" : "#374151";
     ctx.font          = "bold 11px Segoe UI, sans-serif";
     ctx.textAlign     = "center";
@@ -466,7 +424,7 @@ function drawDiagram() {
     ctx.fillText(s, p.x, p.y);
   });
 
-  // Start arrow
+  
   const sp = pos[machine.startState];
   if (sp) {
     ctx.strokeStyle = "#555";
@@ -496,7 +454,7 @@ function drawArrow(ctx, from, to, r, label) {
   const ex = to.x   - nx * r;
   const ey = to.y   - ny * r;
 
-  // Slight curve offset
+ 
   const mx = (sx + ex) / 2 - ny * 20;
   const my = (sy + ey) / 2 + nx * 20;
 
@@ -508,7 +466,7 @@ function drawArrow(ctx, from, to, r, label) {
   const angle = Math.atan2(ey - my, ex - mx);
   arrowHead(ctx, ex, ey, angle, ctx.strokeStyle);
 
-  // Label at midpoint of curve
+ 
   const lx = 0.25 * sx + 0.5 * mx + 0.25 * ex;
   const ly = 0.25 * sy + 0.5 * my + 0.25 * ey;
   ctx.fillStyle     = "#607d8b";
@@ -544,9 +502,6 @@ function arrowHead(ctx, x, y, angle, color) {
 }
 
 
-// =====================================================
-// TAPE HISTORY TAB
-// =====================================================
 function renderHistory() {
   const list = document.getElementById("historyList");
   if (tapeHistory.length === 0) {
@@ -596,9 +551,6 @@ function renderHistory() {
 }
 
 
-// =====================================================
-// COMPLEXITY TAB
-// =====================================================
 function renderComplexity() {
   // Bar chart
   const bars    = document.getElementById("stateStepBars");
@@ -625,7 +577,7 @@ function renderComplexity() {
     });
   }
 
-  // Run history table
+  
   const tbody   = document.getElementById("runHistoryBody");
   tbody.innerHTML = "";
   if (runHistory.length === 0) {
@@ -648,9 +600,8 @@ function renderComplexity() {
 }
 
 
-// =====================================================
-// CUSTOM MACHINE BUILDER
-// =====================================================
+
+
 function addBuilderRow() {
   const tbody = document.getElementById("builderBody");
   const row   = document.createElement("tr");
@@ -715,7 +666,7 @@ function saveCustomMachine() {
   msg.style.color = "#15803d";
 
   setTimeout(() => {
-    // Switch tab manually
+   
     document.querySelectorAll(".tab-content").forEach(el => el.classList.remove("active"));
     document.querySelectorAll(".tab").forEach(el => el.classList.remove("active"));
     document.getElementById("tab-simulate").classList.add("active");
@@ -730,17 +681,15 @@ function saveCustomMachine() {
 }
 
 
-// =====================================================
-// EVENT LISTENERS
-// =====================================================
 
-// Load & Reset button — loads selected machine AND resets tape with current input
+
+
 loadBtn.addEventListener("click", () => {
   loadMachine();
   initMachine();
 });
 
-// Reset button — just resets tape (keeps same machine, restores default input)
+
 resetBtn.addEventListener("click", () => {
   inputStr.value = machine.defaultInput || "";
   initMachine();
@@ -755,7 +704,7 @@ speedSlider.addEventListener("input", () => {
   if (autoTimer) { pauseMachine(); runAuto(); }
 });
 
-// When dropdown changes — load new machine and put its default input
+
 machineSelect.addEventListener("change", () => {
   const key = machineSelect.value;
   if (key === "custom") {
@@ -773,9 +722,7 @@ machineSelect.addEventListener("change", () => {
 window.addEventListener("resize", () => { if (machine) drawDiagram(); });
 
 
-// =====================================================
-// STARTUP
-// =====================================================
+
 (function initBuilder() {
   for (let i = 0; i < 3; i++) addBuilderRow();
 })();
