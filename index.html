@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Turing Machine Simulator</title>
+  <link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- HEADER -->
+  <div class="header">
+    <h1>Turing Machine Simulator</h1>
+    <p class="subtitle">Theory of Computation — Interactive Visual Simulation</p>
+  </div>
+
+  <!-- TABS -->
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('simulate', this)">&#9654; Simulate</button>
+    <button class="tab" onclick="switchTab('builder', this)">&#9998; Custom Builder</button>
+    <button class="tab" onclick="switchTab('history', this)">&#128190; Tape History</button>
+    <button class="tab" onclick="switchTab('complexity', this)">&#128200; Complexity</button>
+  </div>
+
+  <!-- =================== TAB: SIMULATE =================== -->
+  <div id="tab-simulate" class="tab-content active">
+
+    <div class="card">
+      <label class="section-label">Select Machine</label>
+      <div class="row">
+        <select id="machineSelect">
+          <option value="equal01">Equal number of 0s and 1s</option>
+          <option value="palindrome">Binary Palindrome Check</option>
+          <option value="unary">Unary Addition (a+b)</option>
+          <option value="custom">-- My Custom Machine --</option>
+        </select>
+        <input type="text" id="inputStr" placeholder="Enter input string..."/>
+        <button class="btn-primary" id="loadBtn">Load &amp; Reset</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <label class="section-label">Tape (Infinite in both directions)</label>
+      <div class="tape-scroll">
+        <div class="tape" id="tape"></div>
+      </div>
+      <div class="head-label" id="headLabel">&#9650; head at position 0</div>
+    </div>
+
+    <div class="card two-col">
+      <div class="left-col">
+        <label class="section-label">States</label>
+        <div class="states-row" id="statesRow"></div>
+        <label class="section-label" style="margin-top:16px;">Current State</label>
+        <div class="current-state" id="curStateDisplay">&#8212;</div>
+        <label class="section-label" style="margin-top:16px;">What is happening?</label>
+        <div class="plain-english" id="plainEnglish">Load a machine to begin.</div>
+      </div>
+      <div class="right-col">
+        <label class="section-label">Transition Table (&delta;)</label>
+        <div class="table-scroll">
+          <table class="trans-table">
+            <thead>
+              <tr><th>From</th><th>Read</th><th>Write</th><th>Move</th><th>To</th></tr>
+            </thead>
+            <tbody id="transBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <label class="section-label">State Transition Diagram</label>
+      <p class="helper-text">Circles = states &nbsp;|&nbsp; Arrows = transitions &nbsp;|&nbsp; Blue = current state &nbsp;|&nbsp; Green = accept &nbsp;|&nbsp; Red = reject</p>
+      <div class="diagram-scroll">
+        <canvas id="stateDiagram"></canvas>
+      </div>
+    </div>
+
+    <div id="resultBanner" class="result-banner hidden"></div>
+
+    <div class="controls">
+      <button class="btn-secondary" id="stepBtn">Step &#9654;</button>
+      <button class="btn-primary" id="runBtn">Run Auto</button>
+      <button class="btn-secondary" id="pauseBtn" disabled>Pause &#9646;&#9646;</button>
+      <button class="btn-secondary" id="resetBtn">Reset &#8635;</button>
+      <div class="speed-control">
+        <span>Speed:</span>
+        <input type="range" id="speedSlider" min="1" max="10" value="4" step="1"/>
+        <span id="speedVal">4</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <label class="section-label">Step Log</label>
+      <div class="log" id="log">
+        <p class="log-info">Load a machine and press Step or Run Auto to begin.</p>
+      </div>
+    </div>
+
+    <div class="legend">
+      <span><span class="dot blue"></span>Head position</span>
+      <span><span class="dot green"></span>Just written</span>
+      <span>B = Blank symbol</span>
+      <span>L = Move Left &nbsp; R = Move Right</span>
+    </div>
+
+  </div>
+
+  <!-- =================== TAB: CUSTOM BUILDER =================== -->
+  <div id="tab-builder" class="tab-content">
+
+    <div class="card">
+      <label class="section-label">Custom Machine Builder</label>
+      <p class="helper-text">Define your own Turing Machine below. Once saved, select "My Custom Machine" in the Simulate tab.</p>
+
+      <div class="builder-meta">
+        <div class="field-group">
+          <label>Machine Name</label>
+          <input type="text" id="b-name" placeholder="My TM" value="My Custom TM"/>
+        </div>
+        <div class="field-group">
+          <label>Start State</label>
+          <input type="text" id="b-start" placeholder="q0" value="q0"/>
+        </div>
+        <div class="field-group">
+          <label>Accept State</label>
+          <input type="text" id="b-accept" placeholder="accept" value="accept"/>
+        </div>
+        <div class="field-group">
+          <label>Reject State</label>
+          <input type="text" id="b-reject" placeholder="reject" value="reject"/>
+        </div>
+        <div class="field-group">
+          <label>Test Input</label>
+          <input type="text" id="b-input" placeholder="e.g. 0011"/>
+        </div>
+      </div>
+
+      <label class="section-label" style="margin-top:20px;">Transitions</label>
+      <div class="table-scroll">
+        <table class="trans-table">
+          <thead>
+            <tr><th>From State</th><th>Read</th><th>Write</th><th>Move (L or R)</th><th>To State</th><th></th></tr>
+          </thead>
+          <tbody id="builderBody"></tbody>
+        </table>
+      </div>
+
+      <div style="margin-top:12px; display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+        <button class="btn-secondary" onclick="addBuilderRow()">+ Add Transition Row</button>
+        <button class="btn-primary" onclick="saveCustomMachine()">Save &amp; Go to Simulate</button>
+      </div>
+      <div id="builderMsg" style="margin-top:10px; font-size:13px; font-weight:500;"></div>
+    </div>
+
+    <div class="card">
+      <label class="section-label">Reference — Equal 0s and 1s Machine</label>
+      <p class="helper-text">Use this as an example of how to fill the transition table. X and Y are markers written over 0s and 1s.</p>
+      <div class="table-scroll">
+        <table class="trans-table">
+          <thead><tr><th>From</th><th>Read</th><th>Write</th><th>Move</th><th>To</th></tr></thead>
+          <tbody>
+            <tr><td>q0</td><td>0</td><td>X</td><td>R</td><td>q1</td></tr>
+            <tr><td>q0</td><td>1</td><td>Y</td><td>R</td><td>q2</td></tr>
+            <tr><td>q0</td><td>X</td><td>X</td><td>R</td><td>q0</td></tr>
+            <tr><td>q0</td><td>Y</td><td>Y</td><td>R</td><td>q0</td></tr>
+            <tr><td>q0</td><td>B</td><td>B</td><td>R</td><td>accept</td></tr>
+            <tr><td>q1</td><td>1</td><td>Y</td><td>L</td><td>q3</td></tr>
+            <tr><td>q1</td><td>B</td><td>B</td><td>R</td><td>reject</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- =================== TAB: TAPE HISTORY =================== -->
+  <div id="tab-history" class="tab-content">
+    <div class="card">
+      <label class="section-label">Tape Snapshot History</label>
+      <p class="helper-text">Each step is recorded below. Scroll to see how the tape evolved from start to finish. Blue = head position at that step.</p>
+      <div id="historyList" class="history-list">
+        <p class="log-info">Run a simulation first to see the tape history here.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- =================== TAB: COMPLEXITY =================== -->
+  <div id="tab-complexity" class="tab-content">
+    <div class="card">
+      <label class="section-label">Complexity Statistics</label>
+      <p class="helper-text">Time complexity = number of steps taken. Space complexity = number of tape cells touched.</p>
+
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-label">Total Steps</div>
+          <div class="stat-value" id="stat-steps">0</div>
+          <div class="stat-sub">Time complexity</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Tape Cells Used</div>
+          <div class="stat-value" id="stat-cells">0</div>
+          <div class="stat-sub">Space complexity</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Input Length (n)</div>
+          <div class="stat-value" id="stat-input">0</div>
+          <div class="stat-sub">Characters</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Result</div>
+          <div class="stat-value" id="stat-result">&#8212;</div>
+          <div class="stat-sub">Accept / Reject</div>
+        </div>
+      </div>
+
+      <div style="margin-top:24px;">
+        <label class="section-label">Steps Spent in Each State</label>
+        <div id="stateStepBars" class="bar-chart"></div>
+      </div>
+
+      <div style="margin-top:24px;">
+        <label class="section-label">Run History (last 5 runs)</label>
+        <div class="table-scroll">
+          <table class="trans-table">
+            <thead>
+              <tr><th>#</th><th>Machine</th><th>Input</th><th>Steps</th><th>Cells</th><th>Result</th></tr>
+            </thead>
+            <tbody id="runHistoryBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script src="machines.js"></script>
+<script src="script.js"></script>
+</body>
+</html>
