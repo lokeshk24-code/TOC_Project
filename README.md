@@ -195,9 +195,3 @@ Performance optimization for large inputs
 
 This is not just a visualization tool — it is a complete Turing Machine execution environment that makes theoretical computation observable, testable, and interactive.
 
-
-If you want, I can:
-
-Make this look like a top-tier GitHub repo (badges, shields, screenshots, demo GIFs)
-
-Or trim it down if your professor prefers shorter READMEs (most do)
